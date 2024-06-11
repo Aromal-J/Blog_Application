@@ -1,25 +1,34 @@
-import React, { useEffect, useRef } from "react";
+import React, { useContext, useEffect, useRef } from "react";
 import InputBox from "../components/input.component";
 import googleIcon from "../images/google.png";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import AnimationWrapper from "../common/page-animation";
 import { Toaster, toast } from "react-hot-toast";
 import axios from "axios";
 import { storeInSession } from "../common/session";
+import { UserContext } from "../App";
+import { authWithGoogle } from "../common/firebase";
 
 const UserAuthForm = ({ type }) => {
+  let {
+    userAuth,
+    userAuth: { access_token },
+    setUserAuth,
+  } = useContext(UserContext);
+
+  console.log(access_token);
+
   const userAuthThroughServer = (serverRoute, formData) => {
-    axios.post(
-      import.meta.env.VITE_SERVER_DOMAIN + serverRoute,
-      formData
-    )
-    .then(({data}) => {
-      storeInSession('user', JSON.stringify(data))
-      console.log(sessionStorage);
-    })
-    .catch(({ response }) => {
-      toast.error(response.data.error);
-    });
+    axios
+      .post(import.meta.env.VITE_SERVER_DOMAIN + serverRoute, formData)
+      .then(({ data }) => {
+        storeInSession("user", JSON.stringify(data));
+        // console.log(sessionStorage);
+        setUserAuth(data);
+      })
+      .catch(({ response }) => {
+        toast.error(response.data.error);
+      });
   };
 
   const handleSubmit = (e) => {
@@ -60,7 +69,28 @@ const UserAuthForm = ({ type }) => {
     userAuthThroughServer(serverRoute, formData);
   };
 
-  return (
+  const handleGoogleAuth = async (e) => {
+    e.preventDefault();
+
+    try {
+      let user = await authWithGoogle();
+      console.log(user);
+    } catch (error) {
+      toast.error("Trouble logging with google");
+      return console.log(error);
+    }
+
+    // authWithGoogle()
+    //   .then((user) => console.log(user))
+    //   .catch((err) => {
+    //     toast.error("Trouble logging with google");
+    //     console.log(err);
+    //   });
+  };
+
+  return access_token ? (
+    <Navigate to="/" />
+  ) : (
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center">
         <Toaster />
@@ -103,7 +133,10 @@ const UserAuthForm = ({ type }) => {
             <hr className="w-1/2" />
           </div>
 
-          <button className="btn-dark flex items-center justify-center gap-4 w-[90%] center">
+          <button
+            className="btn-dark flex items-center justify-center gap-4 w-[90%] center"
+            onClick={handleGoogleAuth}
+          >
             <img src={googleIcon} className="w-5" />
             Continue with Google
           </button>

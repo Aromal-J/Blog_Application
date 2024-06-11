@@ -5,7 +5,9 @@ import bcrypt from "bcrypt";
 import User from "./Schema/User.js";
 import { nanoid } from "nanoid";
 import jwt from "jsonwebtoken";
-import cors from "cors"
+import cors from "cors";
+import admin from "firebase-admin";
+import aws from "aws-sdk";
 
 const server = express();
 
@@ -15,9 +17,28 @@ let passwordRegex =
   /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/; // regex for password
 
 server.use(express.json());
-server.use(cors())
+server.use(cors());
 
 mongoose.connect(process.env.DB_LOCATION, { autoIndex: true });
+
+//setting up s3 bucket
+const s3 = new aws.S3({
+  region: "eu-north-1",
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+});
+
+const generateUploadUrl = async () => {
+  const date = new Date();
+  const imageName = `${nanoid()}-${date.getTime()}.jpeg`;
+
+  return await s3.getSignedUrlPromise("putObject", {
+    Bucket: "blogging-website-by-aromal",
+    Key: imageName,
+    Expires: 1000,
+    ContentType: "image/jpeg",
+  });
+};
 
 const formateDataToSend = (user) => {
   const { profile_img, username, fullname } = user.personal_info;
@@ -44,6 +65,16 @@ const generateUserName = async (email) => {
 
   return username;
 };
+
+//upload image url route
+server.get("/get-upload-url", (req, res) => {
+  generateUploadUrl()
+    .then((url) => res.status(200).json({ uploadUrl: url }))
+    .catch((err) => {
+      console.log(err);
+      return res.status(500).json({ error: err.message });
+    });
+});
 
 server.post("/signup", (req, res) => {
   const { fullname, email, password } = req.body;
@@ -112,6 +143,10 @@ server.post("/signin", (req, res) => {
       return res.status(500).json({ error: err.message });
     });
 });
+
+// server.post('/google-auth', async(req, res){
+//   let {access_token}=req.body
+// })
 
 server.listen(PORT, () => {
   console.log(`Server is listening to ${PORT}`);
