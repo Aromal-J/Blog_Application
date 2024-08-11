@@ -86,7 +86,7 @@ const PublishForm = () => {
 
 
     let blogObj = {
-      title, banner, des, content, tags
+      title, banner, des, content, tags, draft: false
     }
 
     axios.post(import.meta.env.VITE_SERVER_DOMAIN+"/create-blog", blogObj, {

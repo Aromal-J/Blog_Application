@@ -43,10 +43,8 @@ const generateUploadUrl = async () => {
 
 const verifyJWT = (req, res, next) => {
   const authHeader = req.headers["authorization"];
-  console.log(authHeader);
 
   const token = authHeader && authHeader.split(" ")[1];
-  console.log(token);
 
   if (token === null || token === undefined) {
     return res.status(401).json({ error: "No access token" });
@@ -57,10 +55,7 @@ const verifyJWT = (req, res, next) => {
       return res.status(403).json({ error: "Acess token is invalid" });
     }
 
-    console.log(user);
     req.user = user.id;
-
-    //eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2YjYyY2IwMDY3ZDgyZmQ4NmRjNGZhNCIsImlhdCI6MTcyMzIxNTAyNH0.dwKKaknW6Al0VRdHbX--PdRZ3k38xy0di9BUizgsVQY
 
     next();
   });
@@ -180,29 +175,30 @@ server.post("/create-blog", verifyJWT, (req, res) => {
   let { title, des, banner, tags, content, draft } = req.body;
 
   if (!title.length) {
-    return res
-      .status(403)
-      .json({ error: "You must provide a title to publish the blog" });
+    return res.status(403).json({ error: "You must provide a title" });
   }
-  if (!des.length || des.length > 200) {
-    return res
-      .status(403)
-      .json({ error: "You must provide the description under 200 characters" });
-  }
-  if (!banner.length) {
-    return res
-      .status(403)
-      .json({ error: "You must provide blog banner to publish it" });
-  }
-  if (!content.blocks.length) {
-    return res
-      .status(403)
-      .json({ error: "There must be some blog content to publish it" });
-  }
-  if (!tags.length || tags.length > 10) {
-    return res.status(403).json({
-      error: "Provide tags inorder to publish the blog, Maximum 10 tags",
-    });
+
+  if (!draft) {
+    if (!des.length || des.length > 200) {
+      return res.status(403).json({
+        error: "You must provide the description under 200 characters",
+      });
+    }
+    if (!banner.length) {
+      return res
+        .status(403)
+        .json({ error: "You must provide blog banner to publish it" });
+    }
+    if (!content.blocks.length) {
+      return res
+        .status(403)
+        .json({ error: "There must be some blog content to publish it" });
+    }
+    if (!tags.length || tags.length > 10) {
+      return res.status(403).json({
+        error: "Provide tags inorder to publish the blog, Maximum 10 tags",
+      });
+    }
   }
 
   tags = tags.map((tag) => tag.toLowerCase());
@@ -248,7 +244,6 @@ server.post("/create-blog", verifyJWT, (req, res) => {
     .catch((err) => {
       return res.status(500).json({ error: err.message });
     });
-
 });
 
 server.listen(PORT, () => {
