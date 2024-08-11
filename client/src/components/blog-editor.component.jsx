@@ -12,7 +12,7 @@ import { tools } from "./tools.component";
 const BlogEditor = () => {
   let {
     blog,
-    blog: { title, banner, context, tags, des },
+    blog: { title, banner, content, tags, des },
     setBlog,
     editorState,
     setEditorState,
@@ -24,7 +24,7 @@ const BlogEditor = () => {
     setTextEditor(
       new EditorJS({
         holder: "textEditor",
-        data: "",
+        data: content,
         tools: tools,
         placeholder: "Let's write an awesome story",
       })
@@ -76,13 +76,13 @@ const BlogEditor = () => {
 
   const handlePublishEvent=()=>{
 
-    if(!banner.length){
-      return toast.error("Please upload a blog banner to publish it")
-    }
+    // if(!banner.length){
+    //   return toast.error("Please upload a blog banner to publish it")
+    // }
 
-    if(!title.length){
-      return toast.error("Write blog title to publish it")
-    }
+    // if(!title.length){
+    //   return toast.error("Write blog title to publish it")
+    // }
 
     if(textEditor.isReady){
       textEditor.save().then(data=>{
@@ -90,7 +90,9 @@ const BlogEditor = () => {
         setBlog({...blog, content:data})
         setEditorState("Publish")
        }else{
-        return toast.error("Write something in your blog to publish")
+        setEditorState("Publish")
+
+        // return toast.error("Write something in your blog to publish")
        }
       }).catch(err=>{
         console.log(err);
@@ -135,6 +137,7 @@ const BlogEditor = () => {
               </label>
             </div>
             <textarea
+              defaultValue={title}
               placeholder="Blog Title"
               className="text-4xl font-medium w-full h-24 outline-none resize-none mt-10 leading-tight placeholder:opacity-40 overflow-hidden"
               onKeyDown={handleTitleKeyDown}

@@ -11,6 +11,7 @@ const UserNavigationPannel = () => {
   } = useContext(UserContext);
 
   const signOutUser = () => {
+    console.log('signout button clicked');
     removeFromSession("user");
     setUserAuth({ access_token: null });
   };
