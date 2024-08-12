@@ -77,7 +77,6 @@ const BlogEditor = () => {
 
   const handleBannerError = (e) => {
     let img = e.target;
-    // console.log(img);
     img.src = defaultBanner;
   };
 
