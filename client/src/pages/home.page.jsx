@@ -1,6 +1,6 @@
 import React from "react";
 import AnimationWrapper from "../common/page-animation";
-import InPageNavigaiton from "../components/inpage-navigation.component";
+import InPageNavigation from "../components/inpage-navigation.component";
 
 const HomePage = () => {
   return (
@@ -9,13 +9,13 @@ const HomePage = () => {
 
         {/* latest blog */}
         <div className="w-full">
-          <InPageNavigaiton
+          <InPageNavigation
             routes={["home", "trending blogs"]} defaultHidden={["trending blogs"]}
           >
 
             <h1>Latest blogs here</h1>
             <h1>Trending blogs here</h1>
-          </InPageNavigaiton>
+          </InPageNavigation>
         </div>
 
         {/* filters and trending blog */}
