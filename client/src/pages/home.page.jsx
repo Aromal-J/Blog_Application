@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import AnimationWrapper from "../common/page-animation";
-import InPageNavigation, { activeTabRef } from "../components/inpage-navigation.component";
+import InPageNavigation, {
+  activeTabRef,
+} from "../components/inpage-navigation.component";
 import axios from "axios";
 import { useEffect } from "react";
 import Loader from "../components/loader.component";
@@ -33,6 +35,20 @@ const HomePage = () => {
     }
   };
 
+  const fetchBlogsByCategory = async () => {
+    try {
+      let {
+        data: { blogs },
+      } = await axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs",
+        { tag: pageState }
+      );
+      setBlogs(blogs);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   const fetchTrendingtBlogs = async () => {
     try {
       let {
@@ -59,11 +75,12 @@ const HomePage = () => {
   };
 
   useEffect(() => {
-
-    activeTabRef.current.click()
+    activeTabRef.current.click();
 
     if (pageState === "home") {
       fetchLatestBlogs();
+    } else {
+      fetchBlogsByCategory();
     }
 
     if (!trendingBlogs) {
