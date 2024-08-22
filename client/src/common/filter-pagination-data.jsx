@@ -6,19 +6,13 @@ export const filterPaginationData = async ({
   data,
   page,
   countRoute,
-  data_to_send ={},
+  data_to_send = {},
 }) => {
   let obj;
 
-  
   if (state !== null && !create_new_arr) {
-    console.log('inside if');
-    
     obj = { ...state, results: [...state.results, ...data], page };
-    
   } else {
-    console.log('inside else');
-    
     try {
       let {
         data: { totalDocs },
@@ -27,13 +21,11 @@ export const filterPaginationData = async ({
         data_to_send
       );
 
-      console.log('inside else 2');
-      
-      obj= {results: data, page:1, totalDocs}
+      obj = { results: data, page: 1, totalDocs };
     } catch (err) {
       console.log(err);
     }
   }
 
-  return obj
+  return obj;
 };

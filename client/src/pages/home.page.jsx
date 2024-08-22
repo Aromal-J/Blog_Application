@@ -27,10 +27,7 @@ const HomePage = () => {
     "finances",
   ];
 
-  const fetchLatestBlogs = async ({page}) => {
-
-    console.log('entered fetchlatestblogs');
-    
+  const fetchLatestBlogs = async ({ page }) => {
     try {
       let {
         data: { blogs: apiBlogs },
@@ -39,50 +36,38 @@ const HomePage = () => {
         { page }
       );
 
-      console.log('entered fetchlatestblog try');
-      
-      let formateData = await filterPaginationData({
+      let formatedData = await filterPaginationData({
         state: blogs,
         data: apiBlogs,
         page,
         countRoute: "/all-latest-blogs-count",
       });
-      
-      console.log('entered fetchlatestblog try 2');
 
-      console.log(formateData);
-      
-      setBlogs(formateData);
+      setBlogs(formatedData);
       console.log(blogs);
     } catch (err) {
       console.log(err);
     }
   };
 
-  console.log('testing');
-  
-
-  const fetchBlogsByCategory = async ({page}) => {
-    console.log('entered fetchblogsbycategory');
-    
+  const fetchBlogsByCategory = async ({ page }) => {
     try {
       let {
         data: { blogs: apiBlogs },
       } = await axios.post(
         import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs",
-        { tag: pageState , page}
+        { tag: pageState, page }
       );
-      
-      let formateData = await filterPaginationData({
+
+      let formatedData = await filterPaginationData({
         state: blogs,
         data: apiBlogs,
         page,
         countRoute: "/search-blogs-count",
-        data_to_send :{tag: pageState}
+        data_to_send: { tag: pageState },
       });
 
-
-      setBlogs(formateData);
+      setBlogs(formatedData);
     } catch (err) {
       console.log(err);
     }
@@ -102,15 +87,14 @@ const HomePage = () => {
   };
 
   const loadBlogByCategory = (e) => {
-    console.log('entered loadblogbycategory');
-    
+    console.log("entered loadblogbycategory");
+
     let category = e.target.innerText.toLowerCase();
-    console.log('entered loadblogbycategory 2');
+    console.log("entered loadblogbycategory 2");
 
     setBlogs(null);
 
     console.log(blogs);
-    
 
     if (pageState == category) {
       setPageState("home");
@@ -120,23 +104,20 @@ const HomePage = () => {
     setPageState(category);
   };
 
-  console.log(blogs);
-  
-
   useEffect(() => {
-    console.log('entered useeffect');
-    
     activeTabRef.current.click();
 
-
     if (pageState === "home") {
-      fetchLatestBlogs({page:1});
+      fetchLatestBlogs({ page: 1 });
+
     } else {
-      fetchBlogsByCategory({page:1});
+      fetchBlogsByCategory({ page: 1 });
+
     }
 
     if (!trendingBlogs) {
       fetchTrendingtBlogs();
+      
     }
   }, [pageState]);
 
@@ -150,7 +131,7 @@ const HomePage = () => {
             defaultHidden={["trending blogs"]}
           >
             <>
-              { blogs === null ? (
+              {blogs === null ? (
                 <Loader />
               ) : blogs.results.length ? (
                 blogs.results.map((blog, i) => {
@@ -170,7 +151,12 @@ const HomePage = () => {
                 <NoDataMessage message="No blogs published" />
               )}
 
-              <LoadMoreDataBtn state={blogs} fetchDataFunction={pageState ==="home"?fetchLatestBlogs: fetchBlogsByCategory}/>
+              <LoadMoreDataBtn
+                state={blogs}
+                fetchDataFunction={
+                  pageState === "home" ? fetchLatestBlogs : fetchBlogsByCategory
+                }
+              />
             </>
 
             {trendingBlogs === null ? (

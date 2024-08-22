@@ -225,9 +225,15 @@ server.get("/trending-blogs", async (req, res) => {
 });
 
 server.post("/search-blogs", async (req, res) => {
-  let { tag, page } = req.body;
+  let { tag, page, query } = req.body;
 
-  let findQuery = { tags: tag, draft: false };
+  let findQuery
+
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+  }
 
   let maxLimit = 2;
 
@@ -249,9 +255,16 @@ server.post("/search-blogs", async (req, res) => {
 });
 
 server.post("/search-blogs-count", async (req, res) => {
-  let { tag } = req.body;
+  let { tag, query } = req.body;
+  let findQuery
 
-  let findQuery = { tags: tag, draft: false };
+  if (tag) {
+    findQuery = { tags: tag, draft: false };
+
+  } else if (query) {
+    findQuery = { draft: false, title: new RegExp(query, "i") };
+
+  }
   try {
     let count = await Blog.countDocuments(findQuery);
 
