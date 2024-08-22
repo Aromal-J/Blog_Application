@@ -9,6 +9,8 @@ import Loader from "../components/loader.component";
 import BlogPostCard from "../components/blog-post.component";
 import MinimalBlogPost from "../components/nobanner-blog-post.component";
 import NoDataMessage from "../components/nodata.component";
+import { filterPaginationData } from "../common/filter-pagination-data";
+import LoadMoreDataBtn from "../components/load-more.component";
 
 const HomePage = () => {
   let [blogs, setBlogs] = useState(null);
@@ -25,26 +27,62 @@ const HomePage = () => {
     "finances",
   ];
 
-  const fetchLatestBlogs = async () => {
+  const fetchLatestBlogs = async ({page}) => {
+
+    console.log('entered fetchlatestblogs');
+    
     try {
       let {
-        data: { blogs },
-      } = await axios.get(import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs");
-      setBlogs(blogs);
+        data: { blogs: apiBlogs },
+      } = await axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/latest-blogs",
+        { page }
+      );
+
+      console.log('entered fetchlatestblog try');
+      
+      let formateData = await filterPaginationData({
+        state: blogs,
+        data: apiBlogs,
+        page,
+        countRoute: "/all-latest-blogs-count",
+      });
+      
+      console.log('entered fetchlatestblog try 2');
+
+      console.log(formateData);
+      
+      setBlogs(formateData);
+      console.log(blogs);
     } catch (err) {
       console.log(err);
     }
   };
 
-  const fetchBlogsByCategory = async () => {
+  console.log('testing');
+  
+
+  const fetchBlogsByCategory = async ({page}) => {
+    console.log('entered fetchblogsbycategory');
+    
     try {
       let {
-        data: { blogs },
+        data: { blogs: apiBlogs },
       } = await axios.post(
         import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs",
-        { tag: pageState }
+        { tag: pageState , page}
       );
-      setBlogs(blogs);
+      
+      let formateData = await filterPaginationData({
+        state: blogs,
+        data: apiBlogs,
+        page,
+        countRoute: "/search-blogs-count",
+        data_to_send :{tag: pageState}
+      });
+
+
+      setBlogs(formateData);
     } catch (err) {
       console.log(err);
     }
@@ -53,19 +91,26 @@ const HomePage = () => {
   const fetchTrendingtBlogs = async () => {
     try {
       let {
-        data: { blogs },
+        data: { blogs: apiBlogs },
       } = await axios.get(
         import.meta.env.VITE_SERVER_DOMAIN + "/trending-blogs"
       );
-      setTrendingBlogs(blogs);
+      setTrendingBlogs(apiBlogs);
     } catch (err) {
       console.log(err);
     }
   };
 
   const loadBlogByCategory = (e) => {
+    console.log('entered loadblogbycategory');
+    
     let category = e.target.innerText.toLowerCase();
+    console.log('entered loadblogbycategory 2');
+
     setBlogs(null);
+
+    console.log(blogs);
+    
 
     if (pageState == category) {
       setPageState("home");
@@ -75,13 +120,19 @@ const HomePage = () => {
     setPageState(category);
   };
 
+  console.log(blogs);
+  
+
   useEffect(() => {
+    console.log('entered useeffect');
+    
     activeTabRef.current.click();
 
+
     if (pageState === "home") {
-      fetchLatestBlogs();
+      fetchLatestBlogs({page:1});
     } else {
-      fetchBlogsByCategory();
+      fetchBlogsByCategory({page:1});
     }
 
     if (!trendingBlogs) {
@@ -99,10 +150,10 @@ const HomePage = () => {
             defaultHidden={["trending blogs"]}
           >
             <>
-              {blogs === null ? (
+              { blogs === null ? (
                 <Loader />
-              ) : blogs.length ? (
-                blogs.map((blog, i) => {
+              ) : blogs.results.length ? (
+                blogs.results.map((blog, i) => {
                   return (
                     <AnimationWrapper
                       key={i}
@@ -118,6 +169,8 @@ const HomePage = () => {
               ) : (
                 <NoDataMessage message="No blogs published" />
               )}
+
+              <LoadMoreDataBtn state={blogs} fetchDataFunction={pageState ==="home"?fetchLatestBlogs: fetchBlogsByCategory}/>
             </>
 
             {trendingBlogs === null ? (
