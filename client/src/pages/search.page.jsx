@@ -12,41 +12,55 @@ import { filterPaginationData } from "../common/filter-pagination-data";
 const SearchPage = () => {
   let { query } = useParams();
   let [blogs, setBlogs] = useState(null);
+  let [users, setUsers] = useState(null);
 
-  const searchBlogs = async ({ page , create_new_arr = false }) => {
+  const searchBlogs = async ({ page = 1, create_new_arr = false }) => {
     try {
       let {
         data: { blogs: apiBlogs },
-      } = await axios.post(import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs", {
-        query,
-        page,
-      });
+      } = await axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/search-blogs",
+        {
+          query,
+          page,
+        }
+      );
 
       let formatedData = await filterPaginationData({
         state: blogs,
         data: apiBlogs,
         page,
-        countRoute: "/all-latest-blogs-count",
+        countRoute: "/search-blogs-count",
         data_to_send: { query },
         create_new_arr,
       });
 
-      setBlogs(formatedData)
+      setBlogs(formatedData);
     } catch (err) {
-        console.log(err);
-        
+      console.log(err);
     }
   };
 
-  const resetState=()=>{
-    setBlogs(null)
-  }
+  const fetchUsers = async () => {
+    try {
+      let {data : {users}} = axios.post(
+        import.meta.env.VITE_SERVER_DOMAIN + "/search-users",
+        { query }
+      );
+      setUsers(users)
+    } catch (err) {}
+  };
 
-  useEffect(()=>{
+  useEffect(() => {
     resetState();
-    searchBlogs({page:1, create_new_arr: true})
+    searchBlogs({ page: 1, create_new_arr: true });
+    fetchUsers()
+  }, [query]);
 
-  },[query])
+  const resetState = () => {
+    setBlogs(null);
+    setUsers(null)
+  };
 
   return (
     <section className="h-cover flex justify-center gap-10">
@@ -76,10 +90,7 @@ const SearchPage = () => {
               <NoDataMessage message="No blogs published" />
             )}
 
-            <LoadMoreDataBtn
-              state={blogs}
-              fetchDataFunction={searchBlogs}
-            />
+            <LoadMoreDataBtn state={blogs} fetchDataFunction={searchBlogs} />
           </>
         </InPageNavigation>
       </div>

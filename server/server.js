@@ -195,7 +195,6 @@ server.post("/all-latest-blogs-count", async (req, res) => {
 
   try {
     let count = await Blog.countDocuments({ draft: false });
-
     return res.status(200).json({ totalDocs: count });
   } catch (err) {
     console.log(err.message);
@@ -227,7 +226,7 @@ server.get("/trending-blogs", async (req, res) => {
 server.post("/search-blogs", async (req, res) => {
   let { tag, page, query } = req.body;
 
-  let findQuery
+  let findQuery;
 
   if (tag) {
     findQuery = { tags: tag, draft: false };
@@ -254,20 +253,35 @@ server.post("/search-blogs", async (req, res) => {
   }
 });
 
+server.post("/search-users", async (req, res) => {
+  let { query } = req.body;
+
+  try {
+    let users = await User.find({
+      "personal_info.username": new RegExp(query, "i"),
+    })
+      .limit(50)
+      .select(
+        "personal_info.fullname personal_info.username personal_info.profile_img -_id"
+      );
+
+    return res.status(200).json({ users });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
 server.post("/search-blogs-count", async (req, res) => {
   let { tag, query } = req.body;
-  let findQuery
+  let findQuery;
 
   if (tag) {
     findQuery = { tags: tag, draft: false };
-
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
-
   }
   try {
     let count = await Blog.countDocuments(findQuery);
-
     return res.status(200).json({ totalDocs: count });
   } catch (err) {
     console.log(err.message);

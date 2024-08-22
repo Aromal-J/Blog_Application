@@ -44,7 +44,6 @@ const HomePage = () => {
       });
 
       setBlogs(formatedData);
-      console.log(blogs);
     } catch (err) {
       console.log(err);
     }
@@ -117,7 +116,7 @@ const HomePage = () => {
 
     if (!trendingBlogs) {
       fetchTrendingtBlogs();
-      
+
     }
   }, [pageState]);
 
