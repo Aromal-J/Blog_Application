@@ -8,6 +8,7 @@ import NoDataMessage from "../components/nodata.component";
 import LoadMoreDataBtn from "../components/load-more.component";
 import axios from "axios";
 import { filterPaginationData } from "../common/filter-pagination-data";
+import UserCard from "../components/usercard.component";
 
 const SearchPage = () => {
   let { query } = useParams();
@@ -43,23 +44,53 @@ const SearchPage = () => {
 
   const fetchUsers = async () => {
     try {
-      let {data : {users}} = axios.post(
+      let {
+        data: { users },
+      } = await axios.post(
         import.meta.env.VITE_SERVER_DOMAIN + "/search-users",
-        { query }
+        {
+          query,
+        }
       );
-      setUsers(users)
-    } catch (err) {}
+
+      setUsers(users);
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   useEffect(() => {
     resetState();
     searchBlogs({ page: 1, create_new_arr: true });
-    fetchUsers()
+    fetchUsers();
   }, [query]);
 
   const resetState = () => {
     setBlogs(null);
-    setUsers(null)
+    setUsers(null);
+  };
+
+  const UserCardWrapper = () => {
+    return (
+      <>
+        {users == null ? (
+          <Loader />
+        ) : users.length ? (
+          users.map((user, i) => {
+            return (
+              <AnimationWrapper
+                key={i}
+                transition={{ duration: 1, delay: i * 0.08 }}
+              >
+                <UserCard user={user} />
+              </AnimationWrapper>
+            );
+          })
+        ) : (
+          <NoDataMessage message="No user found" />
+        )}
+      </>
+    );
   };
 
   return (
@@ -92,7 +123,17 @@ const SearchPage = () => {
 
             <LoadMoreDataBtn state={blogs} fetchDataFunction={searchBlogs} />
           </>
+
+          <UserCardWrapper />
         </InPageNavigation>
+      </div>
+
+      <div className="min-w-[40%] lg:min-w-[350px] max-w-min border-l border-grey pl-8 pt-3 max-md:hidden">
+        <h1 className="font-medium text-xl mb-8">
+          User related to search <i className="fi fi-rr-user mt-1"></i>
+        </h1>
+
+        <UserCardWrapper />
       </div>
     </section>
   );
