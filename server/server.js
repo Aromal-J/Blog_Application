@@ -224,7 +224,7 @@ server.get("/trending-blogs", async (req, res) => {
 });
 
 server.post("/search-blogs", async (req, res) => {
-  let { tag, page, query } = req.body;
+  let { tag, page, query, author } = req.body;
 
   let findQuery;
 
@@ -232,6 +232,8 @@ server.post("/search-blogs", async (req, res) => {
     findQuery = { tags: tag, draft: false };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  } else if(author){
+    findQuery= {author, draft: false}
   }
 
   let maxLimit = 2;
@@ -287,14 +289,17 @@ server.post('/get-profile', async(req,res)=>{
 })
 
 server.post("/search-blogs-count", async (req, res) => {
-  let { tag, query } = req.body;
+  let { tag, query, author } = req.body;
   let findQuery;
 
   if (tag) {
     findQuery = { tags: tag, draft: false };
   } else if (query) {
     findQuery = { draft: false, title: new RegExp(query, "i") };
+  }else if(author){
+    findQuery= {author, draft: false}
   }
+
   try {
     let count = await Blog.countDocuments(findQuery);
     return res.status(200).json({ totalDocs: count });
