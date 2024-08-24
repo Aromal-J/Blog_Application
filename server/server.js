@@ -271,6 +271,21 @@ server.post("/search-users", async (req, res) => {
   }
 });
 
+server.post('/get-profile', async(req,res)=>{
+  let {username}=req.body
+
+  try {
+    let user= await User.findOne({'personal_info.username': username}).select('-personal_info.password -google_auth -updatedAt -blogs')
+
+ return res.status(200).json({user})
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({error: err.message})
+    
+  }
+ 
+})
+
 server.post("/search-blogs-count", async (req, res) => {
   let { tag, query } = req.body;
   let findQuery;

@@ -13,6 +13,7 @@ export const UserContext = createContext({});
 
 function App() {
   const [userAuth, setUserAuth]=useState({})
+  
 
   useEffect(()=>{
     let userInSession = lookInSession('user')
